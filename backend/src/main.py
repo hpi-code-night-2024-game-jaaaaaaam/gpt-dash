@@ -7,13 +7,10 @@ import typing
 
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit, join_room, send
-from flask_cors import CORS
-
 
 app = Flask(__name__)
-CORS(app)
 # app.config['SECRET_KEY'] = 'your_secret_key'
-socketio = SocketIO(app)
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 
 @dataclasses.dataclass
