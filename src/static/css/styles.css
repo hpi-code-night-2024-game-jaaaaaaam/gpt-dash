@@ -1,5 +1,9 @@
+html, body {
+    background-color: #474343;
+}
+
 h1 {
-    color: red;
+    color: #b457f7;
     text-align: center;
 }
 
