@@ -23,7 +23,7 @@
 
     <script>
 		import {io} from "socket.io-client";
-        const socket = io();
+        const socket = io('ws://localhost:5000');
 
         socket.on('response', (data) => {
             const responseContainer = document.getElementById('responseContainer');

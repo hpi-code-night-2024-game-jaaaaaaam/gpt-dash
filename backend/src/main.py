@@ -5,7 +5,7 @@ import typing
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit, join_room, send
 
-from backend.game import Game
+from game import Game
 
 app = Flask(__name__)
 # app.config['SECRET_KEY'] = 'your_secret_key'
