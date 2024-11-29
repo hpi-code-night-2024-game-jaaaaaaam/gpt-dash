@@ -8,10 +8,11 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
-    <h1>WebSocket Example</h1>
-    <input type="text" id="messageInput" placeholder="Type a message">
-    <button onclick="sendMessage()">Send</button>
+    <h1>GPT Dash</h1>
     <div id="responseContainer"></div>
+    <input type="text" id="messageInput" placeholder="Type a message">
+    <button onclick="sendMessage()" id="messageSubmit">Send</button>
+    
 
     <script>
         const socket = io();
