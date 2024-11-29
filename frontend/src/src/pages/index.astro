@@ -1,0 +1,50 @@
+---
+
+
+// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
+// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Example</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <h1>GPT Dash</h1>
+    <div id="responseContainer"></div>
+    <input type="text" id="messageInput" placeholder="Type a message">
+    <button onclick="sendMessage()" id="messageSubmit">Send</button>
+    
+
+    <script>
+		import {io} from "socket.io-client";
+        const socket = io();
+
+        socket.on('response', (data) => {
+            const responseContainer = document.getElementById('responseContainer');
+            const newMessage = document.createElement('p');
+
+			if ( responseContainer != null ) {
+            	newMessage.textContent = data.data;
+            	responseContainer.appendChild(newMessage);
+				
+			}
+        });
+
+        function sendMessage() {
+            const input = document.getElementById('messageInput') as HTMLInputElement;
+            const message = input.value;
+		if (input !=  null) {
+			socket.send(message);
+            input.value = '';
+		}
+            
+        }
+    </script>
+</body>
+</html>
