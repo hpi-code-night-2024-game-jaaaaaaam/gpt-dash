@@ -14,10 +14,3 @@ class Player:
 @dataclasses.dataclass
 class Game:
     players: dict[str, Player]
-
-    def add_player(self, name: str):
-        ...
-
-    def submit_answer(self, player_id: str, answer: str):
-        ...
-

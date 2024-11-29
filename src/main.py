@@ -1,4 +1,5 @@
 import dataclasses
+import re
 import typing
 
 from flask import Flask, render_template, request
@@ -15,22 +16,50 @@ socketio = SocketIO(app)
 class Session:
     id_: str
 
-    state: typing.Literal["lobby", "game"] = "lobby"
-    game: Game | None = None
+    state: typing.Literal["lobby", "join-game", "login", "game"] = "lobby"
 
-    def send(self, message: str, role: str):
+    current_game: Game | None = None
+
+    def send(self, message: str, role: str = "system"):
         emit("response", {"data": f"{role}: {message}"}, to=self.id_)
 
     def init(self):
+        self.send("Would you like to (1) create a new game, or (2) join an existing game?", "system")
+
+    def lobby(self, option: str):
+        if option == "1":
+            self
+        elif option == "2":
+            self.state = "join-game"
+            self.send("Enter a valid game code.", "system")
+        else:
+            self.send("Input '1' or '2'.")
+
+    def join_game(self, game_code: str):
+        if game_code not in GAMES:
+            self.send("Game does not exist.", "system")
+        else:
+            self.current_game = GAMES[game_code]
+            self.state = "game"
+            self.send("Joining game!", "system")
+            self.current_game.add_player()
+
+    def login(self, username: str):
         ...
 
+    def game(self, message: str):
+        self.game.on_player_message(message)
+
     def on_message(self, message: str):
-        if self.state == "lobby":
-            ...
+        handler = self.state_message_handlers[self.state]
+        handler(self, message)
 
-        print(f"SESSION ON MESSAGE, {message}")
-        self.send("You said: " + message, "server")
-
+    state_message_handlers: typing.ClassVar[dict] = {
+        "lobby": lobby,
+        "join-game": join_game,
+        "login": login,
+        "game": game,
+    }
 
 GAMES: dict[str, Game] = {}
 SESSIONS: dict[str, Session] = {}
@@ -59,6 +88,6 @@ def on_connect(data):
     SESSIONS[request.sid] = Session(request.sid)
     SESSIONS[request.sid].init()
 
-+
+
 if __name__ == '__main__':
     socketio.run(app, debug=True, allow_unsafe_werkzeug=True)
