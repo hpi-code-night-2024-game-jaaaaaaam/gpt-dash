@@ -60,10 +60,10 @@ class Game:
         elif self.state == "results":
             pass
 
-    def to_voting(self):
+    def to_voting(self, prompt: str):
         self.state = "voting"
 
-        ai_answer = "answer of the AI"
+        ai_answer = openaiAPI.answer_prompt(prompt=prompt)
 
         # noinspection PyTypeChecker
         self.vote_indexes = list(self.players.values()) + [Player(name="AI", session=None, answer=ai_answer)]
@@ -112,7 +112,7 @@ class Game:
 
     def to_answering(self):
         self.state = "answering"
-        prompt = openaiAPI.send_rand_req()
+        prompt = openaiAPI.get_rand_prompt()
 
         # countdown
         answer_time = 120
@@ -131,7 +131,7 @@ class Game:
         for player in self.players.values():
             player.send("Time's up!")
 
-        self.to_voting()
+        self.to_voting(prompt=prompt)
 
 @dataclasses.dataclass
 class Session:
