@@ -6,9 +6,14 @@
     <title>WebSocket Example</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.js"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="index.css">
 </head>
 <body>
-    <h1>GPT Dash</h1>
+    <div>
+        <div></div>
+        <div class="titleBox"><h1 class="title">GPT-Dash</h1></div>
+        <div></div>
+    </div>
     <div id="responseContainer"></div>
     <input type="text" id="messageInput" placeholder="Type a message">
     <button onclick="sendMessage()" id="messageSubmit">Send</button>
