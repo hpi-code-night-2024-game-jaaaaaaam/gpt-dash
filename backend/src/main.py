@@ -23,6 +23,7 @@ class Player:
     answer: str = None
     votes: int = 0
     vote: int = None
+    ready: bool = False
 
     def send(self, message: str, role: str = "system"):
         self.session.send(message, role)
@@ -34,14 +35,12 @@ class Game:
     vote_indexes: list[Player] | None = None
     prompt: str | None = None
 
-    state: typing.Literal["answering", "voting", "results"] = "results"
+    state: typing.Literal["answering", "voting", "results", "waiting"] = "waiting"
 
     def add_player(self, id_: str, session: Session, name: str):
         self.players[id_] = Player(name, session)
         self.players[id_].send(f"You have joined the game as {name!r}.")
-
-        if len(self.players) == 2:
-            self.to_answering()
+        self.players[id_].send("Press any key if you are ready to start the round...")
 
     def on_player_message(self, id_: str, message: str):
         player = self.players[id_]
@@ -58,8 +57,27 @@ class Game:
             else:
                 player.vote = vote_index
                 player.send(f"Vote submitted. ({vote_index})")
+        elif self.state == "waiting":
+            player.ready = True
+            player.send("You are ready!")
+
+            if len(self.players) > 1 and all(player.ready for player in self.players.values()):
+                self.to_answering()
+
         elif self.state == "results":
             pass
+
+    # def to_waiting(self):
+    #     self.state = "waiting"
+    #     for player in self.players.values():
+    #         player.ready = False
+    #
+    #     self.sendall("Press any key to be ready to start the round...")
+    #
+    #     while not all(player.ready for player in self.players.values()):
+    #         time.sleep(1)
+    #
+    #     self.to_answering()
 
     def to_voting(self):
         self.state = "voting"
@@ -139,7 +157,6 @@ class Game:
         # self.sendall(f"You have {t} seconds left to answer.")
 
         while (not stopfunc()) and (t > 0):
-            print("ASD")
             mins, secs = divmod(t, 60)
             timer = '{:02d}:{:02d} left.'.format(mins, secs)
             self.sendall(timer)
@@ -247,9 +264,9 @@ def handle_message(data):
 
 @socketio.on('connect')
 def on_connect(data):
-    emit("response", {"data": f"Your session id is {request.sid}"})
+    # emit("response", {"data": f"Your session id is {request.sid}"})
 
-    emit("response", {"data": f"Willkommen! {request.sid}"}, to=request.sid)
+    emit("response", {"data": f"Welcome!"}, to=request.sid)
 
     SESSIONS[request.sid] = Session(request.sid)
     SESSIONS[request.sid].init()

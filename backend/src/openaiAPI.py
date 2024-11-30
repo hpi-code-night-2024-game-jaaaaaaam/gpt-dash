@@ -28,8 +28,8 @@ def answer_prompt(prompt: str) -> str:
     completion = client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[
-            {"role": "system",
-             "content": "You are playing a game where the humans try to write responses that sound similar to Answers by large language models. Then they will be shown the answers everybody wrote and one answer by a large language model is added, this is your answer. The players vote on which answer was written by you the large language model. Make the answer such that it is possible to guess but not easy. Limit responses to 1 sentence."},
+            {"role": "user",
+             "content": "You are participating in a game where the humans try to come up with responses while trying to imitate a Large Language Model. Then they get to vote which answer was written by you, the Large Language Model. Limit your response to 3 short sentences."},
             {"role": "user", "content": prompt}
         ]
     )

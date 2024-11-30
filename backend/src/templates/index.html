@@ -30,6 +30,7 @@
             newMessage.innerHTML = data.data.replaceAll("\n", "<br>");
             newMessage.className = data.role;
             responseContainer.appendChild(newMessage);
+            responseContainer.scrollTop = responseContainer.scrollHeight;
         });
 
         function sendMessage() {
