@@ -29,7 +29,7 @@ def answer_prompt(prompt: str) -> str:
         model="gpt-3.5-turbo",
         messages=[
             {"role": "user",
-             "content": "You are participating in a game where the humans try to come up with responses while trying to imitate a Large Language Model. Then they get to vote which answer was written by you, the Large Language Model. Limit your response to 3 short sentences."},
+             "content": "You are participating in a game where the humans try to come up with responses while trying to imitate a Large Language Model. Then they get to vote which answer was written by you, the Large Language Model. Limit your brief response to 3 SHORT sentences. Make your response short!"},
             {"role": "user", "content": prompt}
         ]
     )
