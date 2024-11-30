@@ -102,7 +102,7 @@ class Game:
 
             player.send("\n".join(lines))
 
-        self.sendall("Vote for the best answer!")
+        self.sendall("Vote for the answer that came from the LLM!")
 
         self.countdown(60+30*len(self.players), lambda: all(player.vote is not None for player in self.players.values()))
 
@@ -110,6 +110,10 @@ class Game:
 
     def to_results(self):
         self.state = "results"
+
+        for i, player in enumerate(self.vote_indexes):
+            if player.name == "AI":
+                self.sendall(f"The LLM was number {i}!")
 
         for player in self.players.values():
             vote = self.vote_indexes[player.vote]
@@ -142,6 +146,7 @@ class Game:
             player.vote = None
 
         self.sendall(f"Prompt: {self.prompt}")
+        self.sendall(f"Write a response to fool the others that you're the LLM!")
 
         self.countdown(180, lambda: all(player.answer is not None for player in self.players.values()))
 
