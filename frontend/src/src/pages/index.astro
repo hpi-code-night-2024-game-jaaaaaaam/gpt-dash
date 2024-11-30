@@ -18,8 +18,7 @@
     <h1>GPT Dash</h1>
     <div id="responseContainer"></div>
     <input type="text" id="messageInput" placeholder="Type a message">
-    <button onclick="sendMessage()" id="messageSubmit">Send</button>
-    
+    <button id="messageSubmit">Send</button>
 
     <script>
 		import {io} from "socket.io-client";
@@ -32,19 +31,22 @@
 			if ( responseContainer != null ) {
             	newMessage.textContent = data.data;
             	responseContainer.appendChild(newMessage);
-				
 			}
         });
 
-        function sendMessage() {
+        document.getElementById("messageSubmit")?.addEventListener("onclick", (e) => {
+			e.preventDefault();
             const input = document.getElementById('messageInput') as HTMLInputElement;
             const message = input.value;
+			//
+			console.log("Hallo fucking welt 1");
 		if (input !=  null) {
 			socket.send(message);
             input.value = '';
+			console.log("Hallo fucking welt 2");
 		}
             
-        }
+        })
     </script>
 </body>
 </html>
