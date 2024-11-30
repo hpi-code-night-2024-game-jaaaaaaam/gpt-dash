@@ -229,7 +229,7 @@ class Session:
                 self.send("Username is taken.", "system")
                 return
 
-        self.send(f"Joining game as {username!r}!", "system")
+        # self.send(f"Joining game as {username!r}!", "system")
         self.state = "game"
         self.current_game.add_player(self.id_, session=self, name=username)
 
@@ -276,6 +276,15 @@ def on_connect(data):
     SESSIONS[request.sid] = Session(request.sid)
     SESSIONS[request.sid].init()
 
+
+@socketio.on("disconnect")
+def on_connect():
+    sess = SESSIONS[request.sid]
+    if sess.current_game:
+        sess.current_game.sendall(f"Player {sess.current_game.players[request.sid].name!r} has left the game.")
+        del sess.current_game.players[request.sid]
+
+    del SESSIONS[request.sid]
 
 if __name__ == '__main__':
     socketio.run(app, debug=True, allow_unsafe_werkzeug=True, host="0.0.0.0")
