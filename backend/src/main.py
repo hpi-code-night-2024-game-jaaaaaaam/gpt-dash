@@ -19,7 +19,7 @@ class Player:
     name: str
     session: Session
     score: int = 0
-    answer: str = ""
+    answer: str = None
     votes: int = 0
     vote: int = None
 
@@ -38,6 +38,9 @@ class Game:
         self.players[id_] = Player(name, session)
         self.players[id_].send(f"You have joined the game as {name!r}.")
 
+        if len(self.players) == 2:
+            self.to_answering()
+
     def on_player_message(self, id_: str, message: str):
         player = self.players[id_]
         if self.state == "answering":
@@ -46,7 +49,7 @@ class Game:
         elif self.state == "voting":
             try:
                 vote_index = int(message)
-                player = self.vote_indexes[vote_index]
+                vote = self.vote_indexes[vote_index]
             except (ValueError, IndexError):
                 player.send("Invalid vote. Please enter a number.")
                 return
@@ -114,12 +117,15 @@ class Game:
         answer_time = 120
 
         for player in self.players.values():
-            player.answer = ""
+            player.answer = None
             player.vote = None
             player.send(f"Prompt: {prompt}")
             player.send(f"You have {answer_time} seconds left to answer.")
 
-        time.sleep(answer_time)
+        # time.sleep(answer_time)
+
+        while any(player.answer is None for player in self.players.values()):
+            time.sleep(0.5)
 
         for player in self.players.values():
             player.send("Time's up!")
@@ -204,7 +210,7 @@ def index():
 
 @socketio.on('message')
 def handle_message(data):
-    # print(f'Received message: {data} from {request.sid}')
+    print(f'Received message: {data} from {request.sid}')
 
     # emit('response', {'data': f'Server received: {data}'}, broadcast=True)
 
