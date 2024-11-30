@@ -32,9 +32,7 @@ def answer_prompt(prompt: str) -> str:
     completion = client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[
-            {"role": "user",
-             "content": "Du nimmst an einem Spiel teil, bei dem die Mitspieler (Menschen) versuchen, Antworten zu finden, während sie versuchen, ein großes Sprachmodell zu imitieren. Dann dürfen sie abstimmen, welche Antwort von Ihnen, dem großen Sprachmodell, geschrieben wurde. Beschränke deine prägnante Antwort auf 3 KURZE Sätze. Fasse dich kurz!"},
-            {"role": "user", "content": prompt}
+            {"role": "user", "content": f"{prompt}\nAntworte KURZ prägnant in 3 kurzen Sätzen!"}
         ]
     )
     return completion.choices[0].message.content

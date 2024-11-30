@@ -146,7 +146,7 @@ class Game:
             player.vote = None
 
         self.sendall(f"Prompt: {self.prompt}")
-        self.sendall(f"Write a response to fool the others that you're the LLM!")
+        self.sendall(f"Write a response to fool the others that you're the LLM! Remember:\n - short\n - 3 sentences")
 
         self.countdown(180, lambda: all(player.answer is not None for player in self.players.values()))
 
