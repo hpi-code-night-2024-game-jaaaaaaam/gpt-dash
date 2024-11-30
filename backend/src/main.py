@@ -40,7 +40,7 @@ class Game:
     def add_player(self, id_: str, session: Session, name: str):
         self.players[id_] = Player(name, session)
         self.players[id_].send(f"You have joined the game as {name!r}.")
-        self.players[id_].send("Press any key if you are ready to start the round...")
+        self.players[id_].send("Type anything if you are ready to start the round...")
 
     def on_player_message(self, id_: str, message: str):
         player = self.players[id_]
