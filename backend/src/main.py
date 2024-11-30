@@ -5,6 +5,7 @@ import random
 import re
 import time
 import typing
+import openaiAPI
 
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit, join_room, send
@@ -111,7 +112,7 @@ class Game:
 
     def to_answering(self):
         self.state = "answering"
-        prompt = "Ist es nachts kälter als draußen?"
+        prompt = openaiAPI.send_rand_req()
 
         # countdown
         answer_time = 120
@@ -131,7 +132,6 @@ class Game:
             player.send("Time's up!")
 
         self.to_voting()
-
 
 @dataclasses.dataclass
 class Session:
@@ -190,6 +190,26 @@ class Session:
     def on_message(self, message: str):
         handler = self.state_message_handlers[self.state]
         handler(self, message)
+        
+    def countdown(self, t:int, stopfunc:typing.Callable[[], bool]):
+        while not stopfunc() and t :
+            if (t <= 10):
+                mins, secs = divmod(t, 60) 
+                timer = '{:02d}:{:02d} left.'.format(mins, secs) 
+                self.send() 
+                time.sleep(1) 
+                t -= 1
+            else:
+                mins, secs = divmod(t, 60) 
+                timer = '{:02d}:{:02d} left.'.format(mins, secs) 
+                self.send()
+                for _ in range(30):
+                    time.sleep(1)
+                    
+                if not stopfunc():
+                    return
+                    
+                t -= 30
 
     state_message_handlers: typing.ClassVar[dict] = {
         "lobby": lobby,
