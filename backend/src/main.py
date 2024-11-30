@@ -75,8 +75,8 @@ class Game:
             player.votes = 0
             lines.append(f" ({i}) {player.answer}")
 
-        for player in self.players.values():
-            player.send("\n".join(lines))
+        for i, player in enumerate(self.players.values()):
+            player.send("\n".join(lines[:i+1] + lines[i+2:]))
             player.send("Vote for the best answer!")
 
         while any(player.vote is None for player in self.players.values()):
@@ -142,7 +142,7 @@ class Session:
     current_game: Game | None = None
 
     def send(self, message: str, role: str = "system"):
-        emit("response", {"data": f"{role}: {message}"}, to=self.id_)
+        emit("response", {"data": message, "role": role}, to=self.id_)
 
     def init(self):
         self.send("Would you like to (1) create a new game, or (2) join an existing game?", "system")
@@ -188,6 +188,7 @@ class Session:
         self.current_game.on_player_message(self.id_, message)
 
     def on_message(self, message: str):
+        self.send(message, "user")
         handler = self.state_message_handlers[self.state]
         handler(self, message)
         
