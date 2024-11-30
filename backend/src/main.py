@@ -104,7 +104,7 @@ class Game:
 
         self.sendall("Vote for the best answer!")
 
-        self.countdown(120, lambda: all(player.vote is not None for player in self.players.values()))
+        self.countdown(60+30*len(self.players), lambda: all(player.vote is not None for player in self.players.values()))
 
         self.to_results()
 
@@ -143,7 +143,7 @@ class Game:
 
         self.sendall(f"Prompt: {self.prompt}")
 
-        self.countdown(120, lambda: all(player.answer is not None for player in self.players.values()))
+        self.countdown(180, lambda: all(player.answer is not None for player in self.players.values()))
 
         self.sendall("Time's up!")
 
