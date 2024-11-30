@@ -13,10 +13,14 @@
         <div class="titleBox"><h1 class="title">GPT-Dash</h1></div>
         <div></div>
     </div>
-    <div id="responseContainer"></div>
-    <input type="text" id="messageInput" placeholder="Type a message">
-    <button onclick="sendMessage()" id="messageSubmit">Send</button>
-
+    <div>
+        <div id="responseContainer"></div>
+    </div>
+    <div>
+        <input type="text" id="messageInput" placeholder="Type a message">
+        <button onclick="sendMessage()" class="sendButton" id="messageSubmit">Send</button>
+    </div>
+    
     <script>
         const socket = io();
 

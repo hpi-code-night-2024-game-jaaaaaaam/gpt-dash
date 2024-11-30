@@ -1,10 +1,18 @@
-.titleBox{
-    left: 50%;
-    transform: translate(-50%, 0);
-}
-
 .title{
     text-align: center;
-    font-size: large;
+    font-size: 50px;
     font-family: 'Courier New', Courier, monospace;
+}
+
+#responseContainer{
+    padding: 400px 800px 500px 200px;
+    position: relative;
+}
+
+#messageInput{
+
+}
+
+.sendButton{
+
 }
