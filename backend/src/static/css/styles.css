@@ -26,6 +26,7 @@ html, body {
     background-color: #4d4747;
 
     border-radius: 5px;
+    overflow: auto;
 }
 
 #userInput {
