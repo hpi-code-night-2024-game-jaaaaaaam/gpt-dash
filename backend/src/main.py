@@ -165,14 +165,18 @@ class Session:
             self.state = "login"
 
     def login(self, username: str):
+        if username == "AI":
+            self.send("Username is taken.", "system")
+            return
+
         for player in self.current_game.players.values():
-            if player.name == username or player.name == "AI":
+            if player.name == username:
                 self.send("Username is taken.", "system")
                 return
 
         self.send(f"Joining game as {username!r}!", "system")
         self.state = "game"
-        self.current_game.add_player(self.id_, session=self, name="Player")
+        self.current_game.add_player(self.id_, session=self, name=username)
 
     def game(self, message: str):
         self.current_game.on_player_message(self.id_, message)
@@ -200,9 +204,9 @@ def index():
 
 @socketio.on('message')
 def handle_message(data):
-    print(f'Received message: {data} from {request.sid}')
+    # print(f'Received message: {data} from {request.sid}')
 
-    emit('response', {'data': f'Server received: {data}'}, broadcast=True)
+    # emit('response', {'data': f'Server received: {data}'}, broadcast=True)
 
     SESSIONS[request.sid].on_message(data)
 
