@@ -19,9 +19,13 @@ def test():
 # lines = Path("file.txt").read_text().strip().splitlines()
 # randomPrompt = random.choice(lines)
 
+lines = Path("PROMPTS_LIST.txt").read_text().strip().splitlines()
+
+
 def get_random_prompt() -> str:
-    lines = Path("PROMPTS_LIST.txt").read_text().strip().splitlines()
-    return random.choice(lines)
+    a = random.choice(lines)
+    lines.remove(a)
+    return a
 
 
 def answer_prompt(prompt: str) -> str:
