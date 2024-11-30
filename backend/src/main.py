@@ -3,6 +3,7 @@ from __future__ import annotations
 import dataclasses
 import random
 import re
+import time
 import typing
 
 from flask import Flask, render_template, request
@@ -18,8 +19,9 @@ class Player:
     name: str
     session: Session
     score: int = 0
-    answer = ""
+    answer: str = ""
     votes: int = 0
+    vote: int = None
 
     def send(self, message: str, role: str = "system"):
         self.session.send(message, role)
@@ -49,12 +51,18 @@ class Game:
                 player.send("Invalid vote. Please enter a number.")
                 return
             else:
-                vote = self.vote_indexes[vote_index]
-                vote.votes += 1
-                player.send("Vote submitted.")
+                player.vote = vote_index
+                player.send(f"Vote submitted. ({vote_index})")
+        elif self.state == "results":
+            pass
 
     def to_voting(self):
-        self.vote_indexes = list(self.players.values())
+        self.state = "voting"
+
+        ai_answer = "answer of the AI"
+
+        # noinspection PyTypeChecker
+        self.vote_indexes = list(self.players.values()) + [Player(name="AI", session=None, answer=ai_answer)]
         random.shuffle(self.vote_indexes)
 
         lines = ["Answers:"]
@@ -67,11 +75,57 @@ class Game:
             player.send("\n".join(lines))
             player.send("Vote for the best answer!")
 
+        while any(player.vote is None for player in self.players.values()):
+            time.sleep(0.5)
+
+        self.to_results()
+
     def to_results(self):
-        ...
+        self.state = "results"
+
+        for player in self.players.values():
+            vote = self.vote_indexes[player.vote]
+            if vote.name == "AI":
+                player.send("You voted for the AI. ✨ S L A Y ! ✨")
+                player.score += 1
+            else:
+                vote.send(f"{player.name!r} voted for you. ✨ S L A Y ! ✨")
+                vote.score += 1
+
+        players_sorted_by_score = sorted(self.players.values(), key=lambda p: p.score, reverse=True)
+
+        lines = ["Leaderboad:"]
+
+        for i, player in enumerate(players_sorted_by_score):
+            lines.append(f"{i + 1}. {player.name}: {player.score}")
+
+        for player in self.players.values():
+            player.send("\n".join(lines))
+
+        time.sleep(10)
+
+        self.to_answering()
 
     def to_answering(self):
-        ...
+        self.state = "answering"
+        prompt = "Ist es nachts kälter als draußen?"
+
+        # countdown
+        answer_time = 120
+
+        for player in self.players.values():
+            player.answer = ""
+            player.vote = None
+            player.send(f"Prompt: {prompt}")
+            player.send(f"You have {answer_time} seconds left to answer.")
+
+        time.sleep(answer_time)
+
+        for player in self.players.values():
+            player.send("Time's up!")
+
+        self.to_voting()
+
 
 @dataclasses.dataclass
 class Session:
@@ -112,7 +166,7 @@ class Session:
 
     def login(self, username: str):
         for player in self.current_game.players.values():
-            if player.name == username:
+            if player.name == username or player.name == "AI":
                 self.send("Username is taken.", "system")
                 return
 
@@ -133,6 +187,7 @@ class Session:
         "login": login,
         "game": game,
     }
+
 
 GAMES: dict[str, Game] = {}
 SESSIONS: dict[str, Session] = {}
