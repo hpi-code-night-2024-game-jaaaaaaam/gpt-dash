@@ -29,6 +29,10 @@ html, body {
     overflow: auto;
 }
 
+p.user {
+    text-align: right;
+}
+
 #userInput {
     /* maybe put a fucking border there idk [03:34] @micha003 */
     padding: 25px;
