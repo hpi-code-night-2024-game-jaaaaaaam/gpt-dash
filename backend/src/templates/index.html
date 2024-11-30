@@ -27,7 +27,7 @@
         socket.on('response', (data) => {
             const responseContainer = document.getElementById('responseContainer');
             const newMessage = document.createElement('p');
-            newMessage.textContent = data.data;
+            newMessage.innerHTML = data.data.replaceAll("\n", "<br>");
             newMessage.className = data.role;
             responseContainer.appendChild(newMessage);
         });

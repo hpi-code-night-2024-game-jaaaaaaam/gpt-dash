@@ -32,6 +32,7 @@ class Player:
 class Game:
     players: dict[str, Player] = dataclasses.field(default_factory=dict)
     vote_indexes: list[Player] | None = None
+    prompt: str | None = None
 
     state: typing.Literal["answering", "voting", "results"] = "results"
 
@@ -60,27 +61,32 @@ class Game:
         elif self.state == "results":
             pass
 
-    def to_voting(self, prompt: str):
+    def to_voting(self):
         self.state = "voting"
 
-        ai_answer = openaiAPI.answer_prompt(prompt=prompt)
+        self.sendall("Generating LLM answer...")
+        ai_answer = openaiAPI.answer_prompt(prompt=self.prompt)
 
         # noinspection PyTypeChecker
         self.vote_indexes = list(self.players.values()) + [Player(name="AI", session=None, answer=ai_answer)]
         random.shuffle(self.vote_indexes)
 
-        lines = ["Answers:"]
-
         for i, player in enumerate(self.vote_indexes):
             player.votes = 0
-            lines.append(f" ({i}) {player.answer}")
 
         for i, player in enumerate(self.players.values()):
-            player.send("\n".join(lines[:i+1] + lines[i+2:]))
-            player.send("Vote for the best answer!")
+            lines = ["Answers:"]
+            for i, other_player in enumerate(self.vote_indexes):
+                if other_player is player:
+                    continue
 
-        while any(player.vote is None for player in self.players.values()):
-            time.sleep(0.5)
+                lines.append(f" ({i}) {other_player.answer}")
+
+            player.send("\n".join(lines))
+
+        self.sendall("Vote for the best answer!")
+
+        self.countdown(120, lambda: all(player.vote is not None for player in self.players.values()))
 
         self.to_results()
 
@@ -97,7 +103,6 @@ class Game:
                 vote.score += 1
 
         players_sorted_by_score = sorted(self.players.values(), key=lambda p: p.score, reverse=True)
-
         lines = ["Leaderboad:"]
 
         for i, player in enumerate(players_sorted_by_score):
@@ -112,26 +117,48 @@ class Game:
 
     def to_answering(self):
         self.state = "answering"
-        prompt = openaiAPI.get_rand_prompt()
-
-        # countdown
-        answer_time = 120
+        self.prompt = openaiAPI.get_random_prompt()
 
         for player in self.players.values():
             player.answer = None
             player.vote = None
-            player.send(f"Prompt: {prompt}")
-            player.send(f"You have {answer_time} seconds left to answer.")
 
-        # time.sleep(answer_time)
+        self.sendall(f"Prompt: {self.prompt}")
 
-        while any(player.answer is None for player in self.players.values()):
-            time.sleep(0.5)
+        self.countdown(120, lambda: all(player.answer is not None for player in self.players.values()))
 
+        self.sendall("Time's up!")
+
+        self.to_voting()
+
+    def sendall(self, message: str, role: str = "system"):
         for player in self.players.values():
-            player.send("Time's up!")
+            player.send(message, role)
 
-        self.to_voting(prompt=prompt)
+    def countdown(self, t: int, stopfunc: typing.Callable[[], bool]):
+        # self.sendall(f"You have {t} seconds left to answer.")
+
+        while (not stopfunc()) and (t > 0):
+            print("ASD")
+            mins, secs = divmod(t, 60)
+            timer = '{:02d}:{:02d} left.'.format(mins, secs)
+            self.sendall(timer)
+
+            if t <= 10:
+                time.sleep(1)
+                t -= 1
+            elif t <= 30:
+                time.sleep(1)
+                t -= 1
+            else:
+                for _ in range(30):
+                    time.sleep(1)
+
+                    if stopfunc():
+                        return
+
+                t -= 30
+
 
 @dataclasses.dataclass
 class Session:
@@ -191,26 +218,6 @@ class Session:
         self.send(message, "user")
         handler = self.state_message_handlers[self.state]
         handler(self, message)
-        
-    def countdown(self, t:int, stopfunc:typing.Callable[[], bool]):
-        while not stopfunc() and t :
-            if (t <= 10):
-                mins, secs = divmod(t, 60) 
-                timer = '{:02d}:{:02d} left.'.format(mins, secs) 
-                self.send() 
-                time.sleep(1) 
-                t -= 1
-            else:
-                mins, secs = divmod(t, 60) 
-                timer = '{:02d}:{:02d} left.'.format(mins, secs) 
-                self.send()
-                for _ in range(30):
-                    time.sleep(1)
-                    
-                if not stopfunc():
-                    return
-                    
-                t -= 30
 
     state_message_handlers: typing.ClassVar[dict] = {
         "lobby": lobby,
